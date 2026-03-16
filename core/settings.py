@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
 from django.urls import reverse_lazy
@@ -22,12 +23,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d)^8i1-s+mbap%sb&1li93w#d5oq%$25wnyd-8k9^n&a=og%(+'
+# Render'da: Dashboard > Environment > SECRET_KEY ekleyin
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-d)^8i1-s+mbap%sb&1li93w#d5oq%$25wnyd-8k9^n&a=og%(+'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '.onrender.com',  # Tüm alt domainleri kabul eder
+    'lise-deneme-sitesi.onrender.com',
+    '127.0.0.1',
+    'localhost',
+]
+
+# Render ve HTTPS için CSRF güvenli origin'ler (giriş/formlar için)
+CSRF_TRUSTED_ORIGINS = [
+    'https://lise-deneme-sitesi.onrender.com',
+]
 
 
 # Application definition
