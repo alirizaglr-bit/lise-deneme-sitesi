@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Sana Özel Soru Önerileri{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>🔍 Sana Özel Soru Önerileri</h2>
+    <p class="text-muted">Yanlış yaptığın konulara göre senin için seçtik.</p>
+    <hr>
+
+    <div class="row">
+        {% for question in questions %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Konular:</strong> 
+                    {% for topic in question.topics.all %}
+                        <span class="badge bg-info">{{ topic.name }}</span>
+                    {% empty %}
+                        <span class="badge bg-secondary">Konusuz</span>
+                    {% endfor %}
+                </div>
+                <div class="card-body">
+                    <p>{{ question.text|truncatechars:150 }}</p>
+                    {% if question.image %}
+                        <img src="{{ question.image.url }}" class="img-fluid mb-2" style="max-height:150px;">
+                    {% endif %}
+                    <div class="mt-2">
+                        <strong>A)</strong> {{ question.option_a }}<br>
+                        <strong>B)</strong> {{ question.option_b }}<br>
+                        <strong>C)</strong> {{ question.option_c }}<br>
+                        <strong>D)</strong> {{ question.option_d }}<br>
+                        {% if question.option_e %}<strong>E)</strong> {{ question.option_e }}<br>{% endif %}
+                    </div>
+                    <hr>
+                    <p><strong>Doğru Cevap:</strong> {{ question.correct_answer }}</p>
+                    {% if question.explanation %}
+                        <p><strong>Açıklama:</strong> {{ question.explanation|urlize }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Şu anda öneri oluşturulamadı. Daha fazla sınav çözdükçe öneriler gelecektir.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

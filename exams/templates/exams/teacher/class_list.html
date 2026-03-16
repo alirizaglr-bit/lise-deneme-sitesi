@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Sınıflarım{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Sınıflarım</h2>
+        <a href="{% url 'exams:teacher_class_create' %}" class="btn btn-primary">Yeni Sınıf</a>
+    </div>
+    <hr>
+    {% if classes %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Sınıf Adı</th>
+                <th>Öğrenci Sayısı</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cls in classes %}
+            <tr>
+                <td>{{ cls.name }}</td>
+                <td>{{ cls.students.count }}</td>
+                <td>
+                    <a href="{% url 'reports:teacher_class_detail' cls.id %}" class="btn btn-sm btn-primary">Rapor</a>
+                    <a href="{% url 'exams:teacher_class_manage' cls.id %}" class="btn btn-sm btn-warning">Yönet</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">Henüz sınıf oluşturmadınız.</p>
+    {% endif %}
+</div>
+{% endblock %}

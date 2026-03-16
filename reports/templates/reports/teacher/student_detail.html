@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ student.get_full_name }} Raporu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ student.get_full_name }} - Performans Raporu</h2>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Toplam Sınav</div>
+                <div class="card-body"><h3>{{ total_exams }}</h3></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Ortalama Net</div>
+                <div class="card-body"><h3>{{ avg_score }}</h3></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Toplam Doğru</div>
+                <div class="card-body"><h3>{{ total_correct }}</h3></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Toplam Yanlış</div>
+                <div class="card-body"><h3>{{ total_wrong }}</h3></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <canvas id="scoreChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Son Sınavlar</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sınav</th>
+                <th>Tarih</th>
+                <th>Net</th>
+                <th>Detay</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in last_attempts %}
+            <tr>
+                <td>{{ attempt.exam.title }}</td>
+                <td>{{ attempt.end_time|date:"d.m.Y H:i" }}</td>
+                <td>{{ attempt.score|floatformat:2 }}</td>
+                <td><a href="{% url 'reports:student_exam_detail' attempt.id %}" class="btn btn-sm btn-info" target="_blank">İncele</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Henüz sınav çözülmemiş.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'reports:teacher_class_detail' student.enrolled_classes.first.id %}" class="btn btn-secondary">Sınıfa Dön</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('scoreChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [{
+                label: 'Net',
+                data: {{ scores|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}
+

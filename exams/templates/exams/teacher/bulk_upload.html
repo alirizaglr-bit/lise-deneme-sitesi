@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Toplu Soru Yükle - {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ exam.title }} - Toplu Soru Yükle</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Dosya Formatı:</h5>
+                        <p>CSV veya Excel dosyası yükleyin. İlk satır başlık olmalıdır. Aşağıdaki sütun adlarını kullanın:</p>
+                        <ul>
+                            <li><strong>soru_metni</strong> veya <strong>Soru Metni</strong> - Soru metni (zorunlu)</li>
+                            <li><strong>a, b, c, d, e</strong> veya <strong>secenek_a, ...</strong> - Şıklar (A,B,C,D zorunlu, E opsiyonel)</li>
+                            <li><strong>dogru_cevap</strong> veya <strong>Doğru Cevap</strong> - A,B,C,D,E (zorunlu)</li>
+                            <li><strong>sira</strong> veya <strong>Sıra</strong> - Soru sırası (opsiyonel)</li>
+                            <li><strong>aciklama</strong> veya <strong>Açıklama</strong> - Çözüm açıklaması (opsiyonel)</li>
+                        </ul>
+                        <p><a href="#" id="downloadSample">Örnek CSV indir</a></p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Dosya Seçin</label>
+                            <input class="form-control" type="file" name="file" id="file" accept=".csv,.xlsx,.xls" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Yükle</button>
+                        <a href="{% url 'exams:teacher_question_list' exam.id %}" class="btn btn-secondary">İptal</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const downloadSample = document.getElementById('downloadSample');
+        if (!downloadSample) return;
+
+        downloadSample.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sample = `soru_metni,a,b,c,d,e,dogru_cevap,sira,aciklama
+"Türkiye'nin başkenti neresidir?","İstanbul","Ankara","İzmir","Bursa","",B,1,"Ankara'dır."
+"2+2 kaçtır?",3,4,5,6,"",A,2,"2+2=4"`;
+            const blob = new Blob([sample], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ornek_sorular.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Sınavlar{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Deneme Sınavları</h2>
+    <div class="row">
+        {% for exam in exams %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ exam.title }}</h5>
+                    <p class="card-text">{{ exam.description|truncatechars:100 }}</p>
+                    <p><strong>Süre:</strong> {{ exam.duration }} dakika</p>
+                    <p><strong>Soru Sayısı:</strong> {{ exam.total_questions }}</p>
+                    <a href="{% url 'exams:detail' exam.id %}" class="btn btn-primary">İncele</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Henüz aktif sınav bulunmamaktadır.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

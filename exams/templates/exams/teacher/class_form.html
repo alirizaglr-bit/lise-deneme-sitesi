@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Yeni Sınıf{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Yeni Sınıf Oluştur</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Sınıf Adı</label>
+                            <input type="text" name="name" id="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Öğrenciler</label>
+                            <select name="students" id="students" class="form-select" multiple size="10">
+                                {% for s in students %}
+                                <option value="{{ s.id }}">{{ s.get_full_name|default:s.username }} ({{ s.username }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Çoklu seçim için Ctrl (Windows) veya Cmd (Mac) kullanın.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <a href="{% url 'exams:teacher_class_list' %}" class="btn btn-secondary">İptal</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

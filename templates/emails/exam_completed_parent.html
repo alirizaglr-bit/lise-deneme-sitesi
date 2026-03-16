@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Çocuğunuz Sınavı Tamamladı</title>
+</head>
+<body>
+    <h2>Çocuğunuz Sınavı Tamamladı</h2>
+    <p>Merhaba {{ parent.get_full_name }},</p>
+    <p>{{ student.get_full_name }} adlı çocuğunuz <strong>{{ exam.title }}</strong> sınavını tamamladı.</p>
+    <p>
+        Net: {{ attempt.score|floatformat:2 }}
+        (Doğru: {{ attempt.correct_count }}, Yanlış: {{ attempt.wrong_count }}, Boş: {{ attempt.empty_count }})
+    </p>
+    <p>Detaylı rapor için <a href="{{ report_url }}">tıklayın</a>.</p>
+</body>
+</html>
+

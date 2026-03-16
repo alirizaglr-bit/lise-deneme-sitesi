@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - Çözüyorsunuz{% endblock %}
+
+{% block content %}
+{{ answers_map|json_script:"answers-data" }}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center bg-light p-3">
+                <h4>{{ exam.title }}</h4>
+                <div>
+                    <span class="badge bg-primary" id="timer">Kalan Süre: --:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <div id="question-area">
+                {% for question in questions %}
+                <div class="card mb-3 question-card" id="q-{{ question.id }}" style="{% if forloop.first %}{% else %}display:none;{% endif %}">
+                    <div class="card-header">
+                        <strong>Soru {{ forloop.counter }}</strong>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ question.text }}</p>
+                        {% if question.image %}
+                            <img src="{{ question.image.url }}" class="img-fluid mb-3">
+                        {% endif %}
+                        <div class="options">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q-{{ question.id }}" value="A" id="q-{{ question.id }}-a">
+                                <label class="form-check-label" for="q-{{ question.id }}-a">A) {{ question.option_a }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q-{{ question.id }}" value="B" id="q-{{ question.id }}-b">
+                                <label class="form-check-label" for="q-{{ question.id }}-b">B) {{ question.option_b }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q-{{ question.id }}" value="C" id="q-{{ question.id }}-c">
+                                <label class="form-check-label" for="q-{{ question.id }}-c">C) {{ question.option_c }}</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q-{{ question.id }}" value="D" id="q-{{ question.id }}-d">
+                                <label class="form-check-label" for="q-{{ question.id }}-d">D) {{ question.option_d }}</label>
+                            </div>
+                            {% if question.option_e %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q-{{ question.id }}" value="E" id="q-{{ question.id }}-e">
+                                <label class="form-check-label" for="q-{{ question.id }}-e">E) {{ question.option_e }}</label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mt-3 d-flex justify-content-between">
+                <button id="prevBtn" class="btn btn-secondary" onclick="changeQuestion(-1)">Önceki</button>
+                <button id="nextBtn" class="btn btn-primary" onclick="changeQuestion(1)">Sonraki</button>
+                <button id="finishBtn" class="btn btn-success" onclick="finishExam()">Sınavı Bitir</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Soru Listesi</div>
+                <div class="card-body">
+                    <div class="row" id="q-nav-row">
+                        {% for question in questions %}
+                        <div class="col-3 mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 q-nav" data-qid="{{ question.id }}" data-index="{{ forloop.counter0 }}">{{ forloop.counter }}</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    var attemptId = {{ attempt.id }};
+    var totalQuestions = {{ questions|length }};
+    var currentIndex = 0;
+    var answers = JSON.parse(document.getElementById('answers-data').textContent || '{}');
+
+    function changeQuestion(delta) {
+        var newIndex = currentIndex + delta;
+        if (newIndex >= 0 && newIndex < totalQuestions) {
+            currentIndex = newIndex;
+            $('.question-card').hide();
+            $('.question-card').eq(currentIndex).show();
+        }
+    }
+
+    $(document).ready(function() {
+        $('input[type=radio]').each(function() {
+            var name = $(this).attr('name');
+            var qid = name.split('-')[1];
+            if (answers[qid] && answers[qid] === $(this).val()) {
+                $(this).prop('checked', true);
+            }
+        });
+
+        $('input[type=radio]').change(function() {
+            var name = $(this).attr('name');
+            var qid = name.split('-')[1];
+            var selected = $(this).val();
+            $.post('{% url "exams:save_answer" attempt.id %}', {
+                question_id: qid,
+                selected: selected,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            });
+        });
+
+        $('.q-nav').on('click', function() {
+            var qid = $(this).data('qid');
+            currentIndex = $(this).data('index');
+            $('.question-card').hide();
+            $('#q-' + qid).show();
+        });
+    });
+
+    function finishExam() {
+        if (confirm('Sınavı bitirmek istediğinize emin misiniz?')) {
+            window.location.href = '{% url "exams:finish_exam" attempt.id %}';
+        }
+    }
+
+    var remaining = {{ remaining_time }};
+    function updateTimer() {
+        if (remaining <= 0) {
+            window.location.href = '{% url "exams:finish_exam" attempt.id %}';
+            return;
+        }
+        var mins = Math.floor(remaining / 60);
+        var secs = remaining % 60;
+        $('#timer').text('Kalan Süre: ' + mins.toString().padStart(2,'0') + ':' + secs.toString().padStart(2,'0'));
+        remaining--;
+    }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+</script>
+{% endblock %}

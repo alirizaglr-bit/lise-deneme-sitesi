@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="jumbotron">
+        <h1 class="display-4">Hoş Geldiniz, {{ user.get_full_name|default:user.username }}!</h1>
+        <p class="lead">Hesap türünüz: {{ user.get_user_type_display }}</p>
+        <hr class="my-4">
+    </div>
+
+    {% if user.user_type == 'student' %}
+        <div class="mb-3">
+            <a href="{% url 'recommendations:list' %}" class="btn btn-success btn-lg mb-3">🔍 Sana Özel Soru Önerilerini Gör</a>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Son Çözdüğün Sınavlar</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_attempts %}
+                            <ul class="list-group">
+                                {% for attempt in recent_attempts %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ attempt.exam.title }}
+                                        <span class="badge bg-info rounded-pill">{{ attempt.end_time|date:"d.m.Y" }}</span>
+                                        <span class="badge bg-success rounded-pill">{{ attempt.score|floatformat:2 }} net</span>
+                                        <a href="{% url 'reports:student_exam_detail' attempt.id %}" class="btn btn-sm btn-outline-primary">Detay</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Henüz sınav çözmediniz.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>Bekleyen Sınavlar</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_exams %}
+                            <ul class="list-group">
+                                {% for exam in pending_exams %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ exam.title }}
+                                        <a href="{% url 'exams:detail' exam.id %}" class="btn btn-sm btn-success">Başla</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Şu an bekleyen sınavınız yok.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif user.user_type == 'teacher' %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5>Sınıflarım</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if class_stats %}
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Sınıf</th>
+                                        <th>Öğrenci Sayısı</th>
+                                        <th>Aktif Sınav</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in class_stats %}
+                                        <tr>
+                                            <td><a href="{% url 'reports:teacher_class_detail' stat.class.id %}">{{ stat.class.name }}</a></td>
+                                            <td>{{ stat.student_count }}</td>
+                                            <td>{{ stat.active_assignments }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted">Henüz sınıf oluşturmadınız.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5>Son Eklediğin Sınavlar</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_exams %}
+                            <ul class="list-group">
+                                {% for exam in recent_exams %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ exam.title }}
+                                        <span class="badge bg-secondary">{{ exam.total_questions }} soru</span>
+                                        <a href="{% url 'exams:teacher_question_list' exam.id %}" class="btn btn-sm btn-outline-info">Sorular</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Henüz sınav eklemediniz.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif user.user_type == 'parent' %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Çocuklarımın Performansı</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if children_stats %}
+                            <div class="row">
+                                {% for stat in children_stats %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-header bg-light">
+                                                <strong>{{ stat.child.get_full_name }}</strong>
+                                            </div>
+                                            <div class="card-body">
+                                                <p>Toplam Sınav: {{ stat.total_exams }}</p>
+                                                <p>Ortalama Net: {{ stat.avg_score }}</p>
+                                                {% if stat.last_attempt %}
+                                                    <p>Son Sınav: {{ stat.last_attempt.exam.title }} ({{ stat.last_attempt.end_time|date:"d.m.Y" }}) - Net: {{ stat.last_attempt.score|floatformat:2 }}</p>
+                                                    <a href="{% url 'reports:parent_child_detail' stat.child.id %}" class="btn btn-sm btn-primary">Detaylı Rapor</a>
+                                                {% else %}
+                                                    <p>Henüz sınav çözülmemiş.</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Kayıtlı çocuk bulunamadı.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

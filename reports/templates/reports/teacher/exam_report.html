@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }} - Sınıf Raporu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ exam.title }} - Sınıf Raporu</h2>
+    <p><strong>Atama Aralığı:</strong> {{ assignment.start_date|date:"d.m.Y H:i" }} - {{ assignment.end_date|date:"d.m.Y H:i" }}</p>
+
+    <h3 class="mt-4">Öğrenci Sonuçları</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Öğrenci</th>
+                <th>Durum</th>
+                <th>Net</th>
+                <th>Doğru</th>
+                <th>Yanlış</th>
+                <th>Boş</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in student_results %}
+            <tr>
+                <td>{{ res.student.get_full_name }}</td>
+                {% if res.attempt %}
+                    <td>Çözdü</td>
+                    <td>{{ res.score|floatformat:2 }}</td>
+                    <td>{{ res.correct }}</td>
+                    <td>{{ res.wrong }}</td>
+                    <td>{{ res.empty }}</td>
+                {% else %}
+                    <td colspan="5" class="text-muted">Çözülmedi</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3 class="mt-4">En Çok Yanlış Yapılan Sorular</h3>
+    <ol>
+        {% for item in top_wrong_questions %}
+        <li class="mb-2">
+            <strong>Soru {{ item.question.order }}:</strong> {{ item.question.text|truncatechars:100 }}<br>
+            <span class="badge bg-danger">{{ item.wrong_count }} yanlış</span>
+        </li>
+        {% empty %}
+        <p>Henüz yanlış yapılan soru yok.</p>
+        {% endfor %}
+    </ol>
+
+    <a href="{% url 'reports:teacher_class_detail' assignment.assigned_to_class.id %}" class="btn btn-secondary">Geri</a>
+</div>
+{% endblock %}
+

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load youtube_tags %}
+
+{% block title %}{{ exam.title }} Detayı{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ exam.title }} - Sınav Detayı</h2>
+    <p><strong>Tarih:</strong> {{ attempt.end_time|date:"d.m.Y H:i" }}</p>
+    <p><strong>Net:</strong> {{ attempt.score|floatformat:2 }} (Doğru: {{ attempt.correct_count }}, Yanlış: {{ attempt.wrong_count }}, Boş: {{ attempt.empty_count }})</p>
+
+    <div class="row">
+        {% for item in results %}
+        <div class="col-md-12 mb-3">
+            <div class="card {% if item.is_correct %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-header">
+                    <strong>Soru {{ forloop.counter }}</strong>
+                </div>
+                <div class="card-body">
+                    <p>{{ item.question.text }}</p>
+                    {% if item.question.image %}
+                        <img src="{{ item.question.image.url }}" class="img-fluid mb-2" style="max-height:200px;">
+                    {% endif %}
+                    <ul>
+                        <li>A) {{ item.question.option_a }}</li>
+                        <li>B) {{ item.question.option_b }}</li>
+                        <li>C) {{ item.question.option_c }}</li>
+                        <li>D) {{ item.question.option_d }}</li>
+                        {% if item.question.option_e %}<li>E) {{ item.question.option_e }}</li>{% endif %}
+                    </ul>
+                    <p><strong>Verdiğiniz Cevap:</strong> {{ item.selected|default:"Boş" }}</p>
+                    <p><strong>Doğru Cevap:</strong> {{ item.correct }}</p>
+                    {% if item.question.explanation %}
+                        {% with embed_url=item.question.explanation|youtube_embed %}
+                            {% if embed_url %}
+                                <div class="mt-2">
+                                    <iframe width="560" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            {% else %}
+                                <p><strong>Açıklama:</strong> {{ item.question.explanation|linebreaks }}</p>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{% url 'reports:student_dashboard' %}" class="btn btn-secondary">Geri</a>
+</div>
+{% endblock %}
+

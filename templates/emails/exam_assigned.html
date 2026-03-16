@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni Sınav Atandı</title>
+</head>
+<body>
+    <h2>Yeni Sınav Atandı</h2>
+    <p>Merhaba {{ student.get_full_name }},</p>
+    <p>Size <strong>{{ exam.title }}</strong> adlı sınav atanmıştır.</p>
+    <p><strong>Başlangıç:</strong> {{ assignment.start_date|date:"d.m.Y H:i" }}</p>
+    <p><strong>Bitiş:</strong> {{ assignment.end_date|date:"d.m.Y H:i" }}</p>
+    <p>Sınava başlamak için <a href="{{ exam_url }}">buraya tıklayın</a>.</p>
+    <p>Başarılar dileriz.</p>
+</body>
+</html>
+

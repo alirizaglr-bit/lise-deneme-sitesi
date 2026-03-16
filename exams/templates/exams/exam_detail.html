@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>{{ exam.title }}</h3>
+        </div>
+        <div class="card-body">
+            <p>{{ exam.description }}</p>
+            <ul>
+                <li><strong>Süre:</strong> {{ exam.duration }} dakika</li>
+                <li><strong>Soru Sayısı:</strong> {{ exam.total_questions }}</li>
+            </ul>
+            {% if attempt %}
+                <div class="alert alert-warning">Tamamlanmamış bir sınavınız var. Kaldığınız yerden devam edebilirsiniz.</div>
+                <a href="{% url 'exams:take_exam' attempt.id %}" class="btn btn-success">Devam Et</a>
+            {% else %}
+                <a href="{% url 'exams:start' exam.id %}" class="btn btn-primary">Sınava Başla</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

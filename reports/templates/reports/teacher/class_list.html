@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Sınıflarım{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Sınıflarım</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sınıf Adı</th>
+                <th>Öğrenci Sayısı</th>
+                <th>Oluşturulma Tarihi</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in classes %}
+            <tr>
+                <td>{{ class.name }}</td>
+                <td>{{ class.students.count }}</td>
+                <td>{{ class.created_at|date:"d.m.Y" }}</td>
+                <td><a href="{% url 'reports:teacher_class_detail' class.id %}" class="btn btn-sm btn-primary">Rapor</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Henüz sınıf oluşturmadınız.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

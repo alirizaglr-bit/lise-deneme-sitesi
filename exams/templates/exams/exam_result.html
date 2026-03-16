@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Sınav Sonucu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Sınav Sonucu</h2>
+    <div class="card">
+        <div class="card-header">
+            {{ exam.title }} - {{ attempt.end_time|date:"d.m.Y H:i" }}
+        </div>
+        <div class="card-body">
+            <p><strong>Doğru:</strong> {{ attempt.correct_count }}</p>
+            <p><strong>Yanlış:</strong> {{ attempt.wrong_count }}</p>
+            <p><strong>Boş:</strong> {{ attempt.empty_count }}</p>
+            <p><strong>Net:</strong> {{ attempt.score|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Soru Detayları</h3>
+    {% for item in results %}
+        <div class="card mt-2 {% if item.is_correct %}border-success{% else %}border-danger{% endif %}">
+            <div class="card-body">
+                <p><strong>Soru {{ forloop.counter }}:</strong> {{ item.question.text }}</p>
+                <p><strong>Verdiğiniz Cevap:</strong> {{ item.selected|default:"Boş" }}</p>
+                <p><strong>Doğru Cevap:</strong> {{ item.correct }}</p>
+                {% if item.question.explanation %}
+                    <p><strong>Açıklama/Video:</strong> {{ item.question.explanation }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    <a href="{% url 'exams:list' %}" class="btn btn-primary mt-3">Sınav Listesine Dön</a>
+</div>
+{% endblock %}
